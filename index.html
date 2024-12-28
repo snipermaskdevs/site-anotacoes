@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Anotações</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #771cac;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #6200ff;
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: rgb(48, 47, 48);
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .add-button {
+            background-color: #00ff37;
+        }
+        .edit-button {
+            background-color: #ffc107;
+        }
+        .delete-button {
+            background-color: #dc3545;
+        }
+        .note {
+            background: #e9ecef;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            position: relative;
+        }
+        .note button {
+            margin-top: 5px;
+            margin-right: 5px;
+            float: right;
+        }
+        .note h3 {
+            margin: 0;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Minhas Anotações</h1>
+    </header>
+    <div class="container">
+        <input type="text" id="noteTitle" placeholder="Título da anotação">
+        <textarea id="noteInput" placeholder="Escreva sua anotação aqui..."></textarea>
+        <button class="add-button" onclick="addNote()">Adicionar Anotação</button>
+        <div id="notesList"></div>
+    </div>
+
+    <script>
+        function addNote() {
+            const noteTitle = document.getElementById('noteTitle');
+            const noteInput = document.getElementById('noteInput');
+            const notesList = document.getElementById('notesList');
+
+            if (noteTitle.value.trim() !== '' && noteInput.value.trim() !== '') {
+                const note = document.createElement('div');
+                note.className = 'note';
+
+                const title = document.createElement('h3');
+                title.textContent = noteTitle.value;
+
+                const content = document.createElement('p');
+                content.textContent = noteInput.value;
+
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Editar';
+                editButton.className = 'edit-button';
+                editButton.onclick = () => editNote(note, title, content);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Excluir';
+                deleteButton.className = 'delete-button';
+                deleteButton.onclick = () => {
+                    notesList.removeChild(note);
+                    saveNotes();
+                };
+
+                note.appendChild(title);
+                note.appendChild(content);
+                note.appendChild(editButton);
+                note.appendChild(deleteButton);
+                notesList.appendChild(note);
+
+                saveNotes();
+
+                noteTitle.value = '';
+                noteInput.value = '';
+            } else {
+                alert('Digite um título e uma anotação antes de adicionar!');
+            }
+        }
+
+        function editNote(note, title, content) {
+            const newTitle = prompt('Edite o título:', title.textContent);
+            const newContent = prompt('Edite a anotação:', content.textContent);
+
+            if (newTitle !== null && newContent !== null) {
+                title.textContent = newTitle;
+                content.textContent = newContent;
+                saveNotes();
+            }
+        }
+
+        function saveNotes() {
+            const notesList = document.getElementById('notesList');
+            const notes = [];
+
+            notesList.querySelectorAll('.note').forEach(note => {
+                const title = note.querySelector('h3').textContent;
+                const content = note.querySelector('p').textContent;
+                notes.push({ title, content });
+            });
+
+            localStorage.setItem('notes', JSON.stringify(notes));
+        }
+
+        function loadNotes() {
+            const notesList = document.getElementById('notesList');
+            const notes = JSON.parse(localStorage.getItem('notes')) || [];
+
+            notes.forEach(({ title, content }) => {
+                const note = document.createElement('div');
+                note.className = 'note';
+
+                const noteTitle = document.createElement('h3');
+                noteTitle.textContent = title;
+
+                const noteContent = document.createElement('p');
+                noteContent.textContent = content;
+
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Editar';
+                editButton.className = 'edit-button';
+                editButton.onclick = () => editNote(note, noteTitle, noteContent);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Excluir';
+                deleteButton.className = 'delete-button';
+                deleteButton.onclick = () => {
+                    notesList.removeChild(note);
+                    saveNotes();
+                };
+
+                note.appendChild(noteTitle);
+                note.appendChild(noteContent);
+                note.appendChild(editButton);
+                note.appendChild(deleteButton);
+                notesList.appendChild(note);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadNotes);
+    </script>
+</body>
+</html>
